@@ -30,8 +30,10 @@ class Sample {
     trace(mysql.affectedRows);
     trace(mysql.lastInsertId);
     var result:Dynamic = mysql.query("SELECT * FROM `test`");
-    trace(result);
-    trace(mysql.fetch(result));
+    var data:Dynamic;
+    while (null != (data = mysql.fetch(result))) {
+      trace(data);
+    }
     mysql.free(result);
     // close connection
     mysql.close();

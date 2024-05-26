@@ -13,7 +13,6 @@
   ],
   "classPath": "src",
   "dependencies": {
-    "callfunc": "1.1.0",
-    "Emitter": "0.9.0"
+    "callfunc": "1.1.0"
   }
 }

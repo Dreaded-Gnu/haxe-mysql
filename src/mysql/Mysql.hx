@@ -236,6 +236,10 @@ class Mysql {
     var mysqlResultStructure = this.ffi.defineStruct(dataTypes, fields);
     // call mysql fetch row
     var resultPointer:Pointer = this.lib.s.mysql_fetch_row.call(result);
+    // handle end reached
+    if (resultPointer.isNull()) {
+      return null;
+    }
     // access via earlier build mysql result structure
     var result:StructAccess = mysqlResultStructure.access(resultPointer);
     // loop through num fields
