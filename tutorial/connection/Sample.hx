@@ -32,6 +32,9 @@ class Sample {
     var result:Dynamic = mysql.query("SELECT * FROM `test`");
     var data:Dynamic;
     while (null != (data = mysql.fetch(result))) {
+      var e:{id:String, name:String} = data;
+      trace(e.id);
+      trace(e.name);
       trace(data);
     }
     mysql.free(result);
