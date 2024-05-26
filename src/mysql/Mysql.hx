@@ -54,6 +54,7 @@ class Mysql {
     lib.define("mysql_fetch_field_direct", [DataType.Pointer, DataType.UInt], DataType.Pointer);
     lib.define("mysql_free_result", [DataType.Pointer], DataType.Void);
     lib.define("mysql_fetch_row", [DataType.Pointer], DataType.Pointer);
+    lib.define("mysql_num_rows", [DataType.Pointer], DataType.ULong);
     // call mysql init1
     this.mysql = lib.s.mysql_init.call(ffi.getPointer(0));
   }
@@ -175,7 +176,7 @@ class Mysql {
     var queryPointer:Pointer = this.ffi.allocString(query);
     var queryResult:Int = this.lib.s.mysql_real_query.call(this.mysql, queryPointer, query.length);
     if (queryResult != 0) {
-      throw new Exception('Query ${query} failed.');
+      throw new Exception('Query ${query} failed. Error: ${this.error()}');
     }
     // get stored result
     var storedResult:Pointer = this.lib.s.mysql_store_result.call(this.mysql);
@@ -196,6 +197,10 @@ class Mysql {
    * @return Dynamic
    */
   public function fetch(result:Dynamic):Dynamic {
+    // handle invalid
+    if (null == result) {
+      return null;
+    }
     // define mysql field result structure
     var mysqlFieldResultStructure = this.ffi.defineStruct([
       DataType.Pointer, DataType.UInt, DataType.Pointer, DataType.UInt, DataType.Pointer, DataType.UInt, DataType.Pointer, DataType.UInt, DataType.Pointer,
@@ -253,6 +258,15 @@ class Mysql {
     }
 
     return o;
+  }
+
+  /**
+   * Num rows
+   * @param result
+   * @return Int
+   */
+  public function numRows(result:Dynamic):Int {
+    return this.lib.s.mysql_num_rows.call(result);
   }
 
   /**
