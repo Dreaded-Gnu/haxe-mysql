@@ -1,0 +1,23 @@
+services:
+  # mysql container
+  mysql:
+    container_name: haxe_mysql_mysql
+    hostname: haxe_mysql_mysql
+    image: mysql:latest
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+  # mysql web tool
+  adminer:
+    container_name: haxe_mysql_adminer
+    hostname: haxe_mysql_adminer
+    image: adminer:latest
+    ports:
+      - 8080:8080
+    restart: always
+    depends_on:
+      - mysql
+    environment:
+      ADMINER_DEFAULT_SERVER: haxe_mysql_mysql
+      ADMINER_DESIGN: hydra

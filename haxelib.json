@@ -1,0 +1,19 @@
+{
+  "name": "haxe-mysql",
+  "url": "https://github.com/Dreaded-Gnu/haxe-mysql",
+  "license": "MIT",
+  "tags": [
+    "mysql"
+  ],
+  "description": "haxe-mysql is a library, which allows to use mysql or mysql like database.",
+  "version": "0.0.1",
+  "releasenote": "Initial release",
+  "contributors": [
+    "DreadedGnu"
+  ],
+  "classPath": "src",
+  "dependencies": {
+    "callfunc": "1.1.0",
+    "Emitter": "0.9.0"
+  }
+}

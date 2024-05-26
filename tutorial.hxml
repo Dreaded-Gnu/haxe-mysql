@@ -1,0 +1,8 @@
+-cp src
+-lib utest
+-lib callfunc
+--each
+
+-cp tutorial/connection
+-main tutorial.connection.Sample
+-cpp tutorial/connection/sample
