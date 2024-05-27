@@ -18,8 +18,8 @@ class Sample {
     // handle error
     if (false == result) {
       // trace error and errno
-      trace(mysql.error());
-      trace(mysql.errno());
+      trace(mysql.error);
+      trace(mysql.errno);
       // close connection
       mysql.close();
       // skip rest

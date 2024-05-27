@@ -16,6 +16,8 @@ import callfunc.Callfunc;
 class Mysql {
   public var lastInsertId(default, never):Int;
   public var affectedRows(default, never):Int;
+  public var errno(get, never):Int;
+  public var error(get, never):String;
 
   private var ffi:Callfunc;
   private var lib:Library;
@@ -81,6 +83,12 @@ class Mysql {
     var socketPointer:Pointer = socket != null ? this.ffi.allocString(socket) : this.ffi.getPointer(0);
     // connect
     var connection:Pointer = this.lib.s.mysql_real_connect.call(this.mysql, hostPointer, userPointer, passwordPointer, databasePointer, port, socketPointer, 0);
+    // free stuff again
+    hostPointer.free();
+    userPointer.free();
+    passwordPointer.free();
+    databasePointer.free();
+    socketPointer.free();
     // handle error
     return !connection.isNull();
   }
@@ -93,24 +101,6 @@ class Mysql {
   }
 
   /**
-   * Errno function
-   * @return Int
-   */
-  public function errno():Int {
-    var errnoPointer:Pointer = this.lib.s.mysql_errno.call(mysql);
-    return Int64.toInt(errnoPointer.address);
-  }
-
-  /**
-   * Error function
-   * @return String
-   */
-  public function error():String {
-    var errorPointer:Pointer = this.lib.s.mysql_error.call(mysql);
-    return errorPointer.getString();
-  }
-
-  /**
    * Escape string using real escape string
    * @param val
    * @return String
@@ -120,7 +110,10 @@ class Mysql {
     var valPointer:Pointer = this.ffi.allocString(val);
     var resultPointer:Pointer = this.ffi.alloc(len);
     this.lib.s.mysql_real_escape_string.call(this.mysql, resultPointer, valPointer, val.length);
-    return resultPointer.getString();
+    var result:String = resultPointer.getString();
+    valPointer.free();
+    resultPointer.free();
+    return result;
   }
 
   /**
@@ -176,8 +169,9 @@ class Mysql {
     var queryPointer:Pointer = this.ffi.allocString(query);
     var queryResult:Int = this.lib.s.mysql_real_query.call(this.mysql, queryPointer, query.length);
     if (queryResult != 0) {
-      throw new Exception('Query ${query} failed. Error: ${this.error()}');
+      throw new Exception('Query ${query} failed. Error: ${this.error}');
     }
+    queryPointer.free();
     // get stored result
     var storedResult:Pointer = this.lib.s.mysql_store_result.call(this.mysql);
     if (storedResult.isNull()) {
@@ -185,7 +179,7 @@ class Mysql {
       if (0 == fieldCountResult) {
         return null;
       }
-      throw new Exception('Query result fetch for ${query} failed.');
+      throw new Exception('Query result fetch for ${query} failed: ${this.error}');
     }
     // return mysql result
     return storedResult;
@@ -224,6 +218,10 @@ class Mysql {
     for (i in 0...numFields) {
       // get field result pointer
       var fieldResultPointer:Pointer = this.lib.s.mysql_fetch_field_direct.call(result, i);
+      // handle error
+      if (fieldResultPointer.isNull()) {
+        throw new Exception('Fetch field information failed: ${this.error}');
+      }
       // access field structure
       var fieldResult:StructAccess = mysqlFieldResultStructure.access(fieldResultPointer);
       // get name
@@ -291,5 +289,23 @@ class Mysql {
    */
   private function get_affectedRows():UInt {
     return this.lib.s.mysql_affected_rows.call(this.mysql);
+  }
+
+  /**
+   * Getter for errno property
+   * @return Int
+   */
+  private function get_errno():Int {
+    var errnoPointer:Pointer = this.lib.s.mysql_errno.call(mysql);
+    return Int64.toInt(errnoPointer.address);
+  }
+
+  /**
+   * Getter for error property
+   * @return String
+   */
+  private function get_error():String {
+    var errorPointer:Pointer = this.lib.s.mysql_error.call(mysql);
+    return errorPointer.getString();
   }
 }
